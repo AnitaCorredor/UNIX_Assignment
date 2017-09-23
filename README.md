@@ -159,22 +159,22 @@ bt2.5 T/T C/T C/T C/C
 bt2.7 A/A A/A A/A A/A
 
 
-### Join the two files 
+### Editing the SNP positions file
 
-#### 
+In order to joined the genotypes to the SNP positions is necessary a previus work on the snp_position.txt file
 
-Extract the first , the third and the fourth columns of the snp_position.txt and save to the snp_positon_134.txt
+I keep with the first, third and fourth columns of interest of the snp_position.txt file and save to the snp_positon_cutted.txt file
 
 $ cut -f 1,3,4 snp_position.txt > snp_position_cutted.txt
 
-check numer of columns 
+I check that the file has been created correctly 
 
 $ awk '{print NF;exit}' snp_position_cutted.txt
 
 3
 
-check the ten rows of the snp_position_cutted.txt
 $ head snp_position_cutted.txt
+
 SNP_ID	Chromosome	Position
 abph1.20	2	27403404
 abph1.22	2	27403892
@@ -186,18 +186,11 @@ ba1.6	3	181362952
 ba1.9	3	181362666
 bt2.5	4	66290049
 
-
-check the sort status of the snp_position_cutted.txt
-
-$ sort -k1,1 -c snp_position_cutted.txt
-
-sort: snp_position_cutted.txt:2: disorder: abph1.20	2	27403404
-
-sort the snp_position.txt according to the SNP_ID and save to the snp_position_cutted_sorted.txt file
+Now, I sort the snp_position_cutted.txt file and save as a new file snp_position_cutted_sorted.txt. I start by the second line so I skip of the titles.
 
 $ tail -n +2 snp_position_cutted.txt | sort -k1,1 > snp_position_cutted_sorted.txt
 
-check the first ten rows of the snp_position_cutted_sorted.txt
+The new file is sorted by the SNP_ID and doesn't have titles
 
 $ head snp_position_cutted_sorted.txt
 
@@ -212,17 +205,15 @@ ba1.9	3	181362666
 bt2.5	4	66290049
 bt2.7	4	66290994
 
+####  Joining SNP positions and genotypes for Maize groups
 
-######################################################
-#################################
-###########
-
-
-#### 2.2.2 join the snp_position_cutted_sorted.txt and the group_zmm_trans_genotype_sorted.txt
+I joined the files of positions and genotypes by the first columns of both files.
 
 $ join -t $'\t' -1 1 -2 1 snp_position_cutted_sorted.txt group_zmm_trans_genotype_sorted.txt > group_zmm_with_position.txt
 
-check the first ten rows and first five columns of the group_zmm_with_position.txt
+Now, I check the results 
+
+first ten rows and first five columns of the group_zmm_with_position.txt
 
 $ head group_zmm_with_position.txt | awk '{print $1,$2,$3,$4,$5}'
 
@@ -237,7 +228,7 @@ ba1.9 3 181362666 G/G G/T
 bt2.5 4 66290049 C/C C/C
 bt2.7 4 66290994 ?/? ?/?
 
-check the last ten rows and first five columns of the group_zmm_with_position.txt
+last ten rows and first five columns of the group_zmm_with_position.txt
 
 $ tail -n 10 group_zmm_with_position.txt | awk '{print $1,$2,$3,$4,$5}'
 
@@ -252,11 +243,13 @@ zen1.4 unknown unknown ?/? T/T
 zfl2.6 2 12543294 G/G C/C
 zmm3.4 9 16966348 C/C C/C
 
-#### 2.2.3 join the snp_position_cutted_sorted.txt and group_zmp_trans_genotype_sorted.txt
+#### Joining SNP positions and genotypes for Teosinte groups
+
+I joined the files of positions and genotypes by the first columns of both files.
 
 $ join -t $'\t' -1 1 -2 1 snp_position_cutted_sorted.txt group_zmp_trans_genotype_sorted.txt > group_zmp_with_position.txt
 
-check the first ten rows and first five columns of the group_zmp_with_position.txt
+first ten rows and first five columns of the group_zmp_with_position.txt
 
 $ head group_zmp_with_position.txt | awk '{print $1,$2,$3,$4,$5}'
 
@@ -271,7 +264,7 @@ ba1.9 3 181362666 G/G G/G
 bt2.5 4 66290049 T/T C/T
 bt2.7 4 66290994 A/A A/A
 
-check the last ten rows and first five columns of the group_zmp_with_position.txt
+last ten rows and first five columns of the group_zmp_with_position.txt
 
 $ tail group_zmp_with_position.txt | awk '{print $1,$2,$3,$4,$5}'
 
@@ -286,13 +279,14 @@ zen1.4 unknown unknown T/T C/C
 zfl2.6 2 12543294 G/G ?/?
 zmm3.4 9 16966348 C/C ?/?
 
-### 2.3 For maize (Group = ZMMIL, ZMMLR, and ZMMR in the third column of the fang_et_al_genotypes.txt file) need to seperate into 20 files
+### Creating files for Maize chromosomes and encoding missing data
 
-10 files (1 for each chromosome) with SNPs ordered based on increasing position values and with missing data encoded by ?
+The following line encoded the missing data with the command sed 's/?.?/?/g'
+The command more is used to displayed the files being created
+The command sort 
 
 $  more group_zmm_with_position.txt | sed 's/?.?/?/g' | sort -k2,2n -k3,3n | awk -F '\t' '{print >"group_zmm_with_incre_pos_chr"$2".txt"}'
 
-check the files
 $ wc *zmm*incre*
      53   83528  326406 group_zmm_with_incre_pos_chr10.txt
     155  244280  952543 group_zmm_with_incre_pos_chr1.txt
@@ -309,6 +303,7 @@ $ wc *zmm*incre*
     983 1549202 6057428 total
     
 10 files (1 for each chromosome) with SNPs ordered based on decreasing position values and with missing data encoded by -
+
 $ more group_zmm_with_position.txt | sed 's/?.?/-/g' | sort -k2,2n -k3,3nr | awk -F '\t' '{print >"group_zmm_with_decre_pos_chr"$2".txt"}'
 
 check the files
@@ -327,7 +322,7 @@ $ wc *zmm*de*
      27   42552  166473 group_zmm_with_decre_pos_chrunknown.txt
     983 1549202 6057428 total
 
-### 2.4 For teosinte (Group = ZMPBA, ZMPIL, and ZMPJA in the third column of the fang_et_al_genotypes.txt file) need to seperate into 20 files:
+### Creating files for Teosinte chromosomes and encoding missing data
 10 files (1 for each chromosome) with SNPs ordered based on increasing positions values and with missing data encoded by ?
 $ more group_zmp_with_position.txt | sed 's/?.?/?/g' | sort -k2,2n -k3,3n | awk -F '\t' '{print >"group_zmp_with_incre_pos_chr"$2".txt"}'
 
